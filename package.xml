@@ -42,6 +42,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>ed</depend>
   <depend>moveit_msgs</depend>
+  <depend>roscpp</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
