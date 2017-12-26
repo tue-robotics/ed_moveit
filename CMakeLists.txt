@@ -9,8 +9,12 @@ add_compile_options(-std=c++11)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   ed
+  geolib2
+  geometry_msgs
   moveit_msgs
   roscpp
+  shape_msgs
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -79,7 +83,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   #INCLUDE_DIRS include
-  CATKIN_DEPENDS ed moveit_msgs
+  CATKIN_DEPENDS ed geolib2 geometry_msgs moveit_msgs roscpp shape_msgs std_srvs # ASK FOR HELP TO CHECK WHICH PKGS SHOULD BE HERE
 )
 
 include_directories(

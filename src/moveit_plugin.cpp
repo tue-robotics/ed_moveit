@@ -7,7 +7,12 @@
 #include <ros/node_handle.h>
 #include <ros/advertise_service_options.h>
 
+#include <geolib/Shape.h>
+#include <geolib/Mesh.h>
 #include <geolib/ros/msg_conversions.h>
+#include <geometry_msgs/Pose.h>
+#include <shape_msgs/Mesh.h>
+
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -32,11 +37,14 @@ void MoveitPlugin::configure(tue::Configuration config)
 
 void MoveitPlugin::initialize()
 {
-    ros::NodeHandle nh;
-//    ros::AdvertiseServiceOptions opt_set_entity =
-//            ros::AdvertiseServiceOptions::create<ed_msgs::SetEntity>(
-//                "/ed/set_entity", boost::bind(&BuilderPlugin::srvSetEntity, this, _1, _2), ros::VoidPtr(), &cb_queue_);
-//    srv_set_entity_ = nh.advertiseService(opt_set_entity);
+    ros::NodeHandle nh("~");
+    ros::NodeHandle nh_private;
+    ros::AdvertiseServiceOptions opt_publish_moveit_scene_ =
+            ros::AdvertiseServiceOptions::create<std_srvs::Trigger>(
+                "moveit_scene", boost::bind(&MoveitPlugin::srvPublishMoveitScene, this, _1, _2), ros::VoidPtr(), &cb_queue_);
+    srv_publish_moveit_scene_ = nh.advertiseService(opt_publish_moveit_scene_);
+
+    moveit_scene_publisher_ = nh_private.advertise<moveit_msgs::PlanningSceneWorld>("planning_scene_world", 1);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -50,53 +58,40 @@ void MoveitPlugin::process(const ed::WorldModel& world, ed::UpdateRequest& req)
 
 // ----------------------------------------------------------------------------------------------------
 
-//bool BuilderPlugin::srvSetEntity(ed_msgs::SetEntity::Request& req, ed_msgs::SetEntity::Response& res)
-//{
-//    if (req.action == ed_msgs::SetEntity::Request::ADD)
-//    {
-//        ed::models::Loader l;
-//        geo::ShapePtr shape = l.loadShape(req.type);
-//        if (shape)
-//        {
-//            ed::EntityPtr e(new ed::Entity(req.id, req.type));
-//            e->setShape(shape);
+bool MoveitPlugin::srvPublishMoveitScene(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
+{
+    ROS_INFO("[ED MOVEIT] Generating moveit planning scene");
+    moveit_msgs::PlanningSceneWorld msg;
+    for(ed::WorldModel::const_iterator it = world_model_->begin(); it != world_model_->end(); ++it)
+        {
+            const ed::EntityConstPtr& e = *it;
 
-//            // Set the pose
-//            geo::Pose3D pose;
-//            geo::convert(req.pose, pose);
-//            e->setPose(pose);
+            if (!e->has_pose() || !e->shape() || e->existenceProbability() < 0.95 || e->hasFlag("self") || e->id() == "floor")
+                continue;
 
-//            update_req_->setEntity(e);
-//        }
-//        else
-//        {
-//            res.error_msg = "No shape could be loaded for type '" + req.type + "'.";
-//        }
-//    }
-//    else if (req.action == ed_msgs::SetEntity::Request::DELETE)
-//    {
-//        update_req_->removeEntity(req.id);
-//    }
-//    else if (req.action == ed_msgs::SetEntity::Request::UPDATE_POSE)
-//    {
-//        ed::EntityConstPtr e = world_model_->getEntity(req.id);
-//        if (e)
-//        {
-//            geo::Pose3D new_pose;
-//            geo::convert(req.pose, new_pose);
+            const geo::Mesh mesh = e->shape()->getMesh();
 
-//            ed::EntityPtr e_new(new ed::Entity(*e));
-//            e_new->setPose(new_pose);
+            shape_msgs::Mesh mesh_msg;
+            geo::convert(mesh, mesh_msg);
 
-//            update_req_->setEntity(e_new);
-//        }
-//        else
-//        {
-//            res.error_msg = "Entity '" + req.id + "' does not exist.";
-//        }
-//    }
+            moveit_msgs::CollisionObject object_msg;
+            object_msg.meshes.push_back(mesh_msg);
 
-//    return true;
-//}
+            //Pose is in /map frame. When publishing in own frame, pose can be zero.
+            geometry_msgs::Pose pose_msg;
+            geo::convert(e->pose(), pose_msg);
+            object_msg.mesh_poses.push_back(pose_msg);
+
+            object_msg.operation = moveit_msgs::CollisionObject::ADD;
+            object_msg.id = e->id().str();
+            object_msg.header.frame_id = "/map";
+            object_msg.header.stamp = ros::Time::now();
+            msg.collision_objects.push_back(object_msg);
+        }
+
+    moveit_scene_publisher_.publish(msg);
+    res.success = true;
+    return true;
+}
 
 ED_REGISTER_PLUGIN(MoveitPlugin)

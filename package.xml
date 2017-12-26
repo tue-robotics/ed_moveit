@@ -41,8 +41,12 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   <depend>ed</depend>
+  <depend>geolib2</depend>
+  <depend>geometry_msgs</depend>
   <depend>moveit_msgs</depend>
   <depend>roscpp</depend>
+  <depend>shape_msgs</depend>
+  <depend>std_srvs</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

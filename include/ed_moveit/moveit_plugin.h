@@ -13,6 +13,10 @@
 // Configuration
 #include <tue/config/configuration.h>
 
+//msgs&srvs
+#include <moveit_msgs/PlanningSceneWorld.h>
+#include <std_srvs/Trigger.h>
+
 class MoveitPlugin : public ed::Plugin
 {
 
@@ -38,10 +42,10 @@ private:
 
     ros::CallbackQueue cb_queue_;
 
-    ros::ServiceServer srv_set_entity_;
 
-
-//    bool srvSetEntity(ed_msgs::SetEntity::Request& req, ed_msgs::SetEntity::Response& res);
+    ros::ServiceServer srv_publish_moveit_scene_;
+    bool srvPublishMoveitScene(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
+    ros::Publisher moveit_scene_publisher_;
 
 };
 
