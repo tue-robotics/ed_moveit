@@ -1,10 +1,15 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model
+  href="http://download.ros.org/schema/package_format3.xsd"
+  schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>ed_moveit</name>
   <version>0.0.0</version>
   <description>The ed_moveit package</description>
 
-  <maintainer email="amigo@todo.todo">Matthijs van der Burgh</maintainer>
+  <author email="MatthijsBurgh@outlook.com">Matthijs van der Burgh</author>
+
+  <maintainer email="MatthijsBurgh@outlook.com">Matthijs van der Burgh</maintainer>
 
   <license>TODO</license>
 
