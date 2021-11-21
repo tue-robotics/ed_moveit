@@ -77,14 +77,14 @@ bool MoveitPlugin::srvPublishMoveitScene(std_srvs::Trigger::Request& req, std_sr
             moveit_msgs::CollisionObject object_msg;
             object_msg.meshes.push_back(mesh_msg);
 
-            //Pose is in /map frame. When publishing in own frame, pose can be zero.
+            //Pose is in 'map' frame. When publishing in own frame, pose can be zero.
             geometry_msgs::Pose pose_msg;
             geo::convert(e->pose(), pose_msg);
             object_msg.mesh_poses.push_back(pose_msg);
 
             object_msg.operation = moveit_msgs::CollisionObject::ADD;
             object_msg.id = e->id().str();
-            object_msg.header.frame_id = "/map";
+            object_msg.header.frame_id = "map";
             object_msg.header.stamp = ros::Time::now();
             msg.collision_objects.push_back(object_msg);
         }
