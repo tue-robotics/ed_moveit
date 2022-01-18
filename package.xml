@@ -23,4 +23,8 @@
   <depend>shape_msgs</depend>
   <depend>std_srvs</depend>
 
+  <export>
+    <ed plugin="${prefix}/plugins.xml" />
+  </export>
+
 </package>
