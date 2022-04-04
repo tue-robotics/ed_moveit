@@ -66,13 +66,51 @@ bool MoveitPlugin::srvPublishMoveitScene(std_srvs::Trigger::Request& req, std_sr
         {
             const ed::EntityConstPtr& e = *it;
 
-            if (!e->has_pose() || !e->shape() || e->hasFlag("self") || e->id() == "floor")
+            if (!e->has_pose() || e->hasFlag("self") || e->id() == "floor")
                 continue;
 
-            const geo::Mesh mesh = e->shape()->getMesh();
-
             shape_msgs::Mesh mesh_msg;
-            geo::convert(mesh, mesh_msg);
+            if (e->shape())
+            {
+                const geo::Mesh& mesh = e->shape()->getMesh();
+                geo::convert(mesh, mesh_msg);
+            }
+            else if (!e->convexHull().points.empty())
+            {
+                const ed::ConvexHull& convex_hull = e->convexHull();
+
+                const geo::Pose3D& e_origin = e->pose();
+
+                mesh_msg.vertices.resize(2 + 2*convex_hull.points.size());
+                mesh_msg.triangles.resize(4*convex_hull.points.size());
+                geo::convert((e_origin * geo::Pose3D(0, 0, convex_hull.z_min)).getOrigin(), mesh_msg.vertices[0]);
+                geo::convert((e_origin * geo::Pose3D(0, 0, convex_hull.z_max)).getOrigin(), mesh_msg.vertices[1]);
+
+                for(unsigned int i = 0; i < convex_hull.points.size(); ++i)
+                {
+                    unsigned int j = (i + 1) % convex_hull.points.size();
+
+                    ROS_ERROR_STREAM("i: " << i << ", j: " << j << std::endl << ", begin: " << 4*i+2 << ", end: " << 4*i+5);
+
+                    const geo::Vec2f& p1_2d = convex_hull.points[i];
+//                    const geo::Vec2f& p2_2d = convex_hull.points[j];
+
+                    geo::Pose3D p1_min = e_origin * geo::Pose3D(p1_2d.x, p1_2d.y, convex_hull.z_min);
+                    geo::Pose3D p1_max = e_origin * geo::Pose3D(p1_2d.x, p1_2d.y, convex_hull.z_max);
+//                    geo::Pose3D p2_min = e_origin * geo::Pose3D(p2_2d.x, p2_2d.y, convex_hull.z_min);
+//                    geo::Pose3D p2_max = e_origin * geo::Pose3D(p2_2d.x, p2_2d.y, convex_hull.z_max);
+
+                    geo::convert(p1_min.getOrigin(), mesh_msg.vertices[4*i+2]);
+                    geo::convert(p1_max.getOrigin(), mesh_msg.vertices[4*i+3]);
+//                    geo::convert(p2_min.getOrigin(), mesh_msg.vertices[4*j+2]);
+//                    geo::convert(p2_max.getOrigin(), mesh_msg.vertices[4*j+3]);
+
+                    mesh_msg.triangles[4*i].vertex_indices = {0, 4*i+3, 4*i+2}; // Bottom
+                    mesh_msg.triangles[4*i+1].vertex_indices = {1, 4*j+2, 4*j+2}; // Top
+                    mesh_msg.triangles[4*i+2].vertex_indices = {4*i+2, 4*i+3, 4*j+2}; // Side 1
+                    mesh_msg.triangles[4*i+3].vertex_indices = {4*i+3, 4*j+3, 4*j+2}; // Side 2
+                }
+            }
 
             moveit_msgs::CollisionObject object_msg;
             object_msg.meshes.push_back(mesh_msg);
