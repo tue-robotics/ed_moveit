@@ -28,9 +28,8 @@ MoveitPlugin::~MoveitPlugin()
 
 // ----------------------------------------------------------------------------------------------------
 
-void MoveitPlugin::configure(tue::Configuration config)
+void MoveitPlugin::configure(tue::Configuration /*config*/)
 {
-
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -58,7 +57,7 @@ void MoveitPlugin::process(const ed::WorldModel& world, ed::UpdateRequest& req)
 
 // ----------------------------------------------------------------------------------------------------
 
-bool MoveitPlugin::srvPublishMoveitScene(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res)
+bool MoveitPlugin::srvPublishMoveitScene(std_srvs::Trigger::Request& /*req*/, std_srvs::Trigger::Response& res)
 {
     ROS_INFO("[ED MOVEIT] Generating moveit planning scene");
     moveit_msgs::PlanningSceneWorld msg;
