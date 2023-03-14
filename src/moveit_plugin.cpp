@@ -36,14 +36,14 @@ void MoveitPlugin::configure(tue::Configuration /*config*/)
 
 void MoveitPlugin::initialize()
 {
-    ros::NodeHandle nh("~");
-    ros::NodeHandle nh_private;
+    ros::NodeHandle nh;
+    ros::NodeHandle nh_private("~");
     ros::AdvertiseServiceOptions opt_publish_moveit_scene_ =
             ros::AdvertiseServiceOptions::create<std_srvs::Trigger>(
                 "moveit_scene", boost::bind(&MoveitPlugin::srvPublishMoveitScene, this, _1, _2), ros::VoidPtr(), &cb_queue_);
-    srv_publish_moveit_scene_ = nh.advertiseService(opt_publish_moveit_scene_);
+    srv_publish_moveit_scene_ = nh_private.advertiseService(opt_publish_moveit_scene_);
 
-    moveit_scene_publisher_ = nh_private.advertise<moveit_msgs::PlanningSceneWorld>("planning_scene_world", 1);
+    moveit_scene_publisher_ = nh.advertise<moveit_msgs::PlanningSceneWorld>("planning_scene_world", 1);
 }
 
 // ----------------------------------------------------------------------------------------------------
