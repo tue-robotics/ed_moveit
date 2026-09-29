@@ -18,10 +18,8 @@
 
 #include <rclcpp/callback_group.hpp>
 #include <rclcpp/logging.hpp>
-#include <rclcpp/node.hpp>
 #include <rclcpp/qos.hpp>
 
-#include <functional>
 #include <memory>
 
 // ----------------------------------------------------------------------------------------------------
@@ -32,7 +30,8 @@ void MoveitPlugin::initialize()
     cb_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive, false);
     srv_publish_moveit_scene_ = node_->create_service<std_srvs::srv::Trigger>(
         "~/moveit_scene",
-        std::bind(&MoveitPlugin::srvPublishMoveitScene, this, std::placeholders::_1, std::placeholders::_2),
+        [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>& req,
+               const std::shared_ptr<std_srvs::srv::Trigger::Response>& res) { srvPublishMoveitScene(req, res); },
         rclcpp::ServicesQoS(),
         cb_group_);
     executor_.add_callback_group(cb_group_, node_->get_node_base_interface());
