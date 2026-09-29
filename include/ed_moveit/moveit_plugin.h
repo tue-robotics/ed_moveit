@@ -5,7 +5,11 @@
 
 #include <ed/types.h>
 
-#include <rclcpp/rclcpp.hpp>
+// Communication
+#include <rclcpp/callback_group.hpp>
+#include <rclcpp/executors/single_threaded_executor.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/service.hpp>
 
 // Configuration
 #include <tue/config/configuration.h>
@@ -13,6 +17,8 @@
 //msgs&srvs
 #include <moveit_msgs/msg/planning_scene_world.hpp>
 #include <std_srvs/srv/trigger.hpp>
+
+#include <memory>
 
 class MoveitPlugin : public ed::Plugin
 {
@@ -35,10 +41,14 @@ private:
 
     ed::UpdateRequest* update_req_;
 
+    // Communication
+
+    rclcpp::CallbackGroup::SharedPtr cb_group_;
+    rclcpp::executors::SingleThreadedExecutor executor_;
+
     rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr srv_publish_moveit_scene_;
-    void srvPublishMoveitScene(
-        const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-        std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+    void srvPublishMoveitScene(const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
+                               std::shared_ptr<std_srvs::srv::Trigger::Response> res);
     rclcpp::Publisher<moveit_msgs::msg::PlanningSceneWorld>::SharedPtr moveit_scene_publisher_;
 
 };

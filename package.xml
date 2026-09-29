@@ -7,11 +7,11 @@
   <version>0.0.0</version>
   <description>The ed_moveit package</description>
 
-  <author email="MatthijsBurgh@outlook.com">Matthijs van der Burgh</author>
-
   <maintainer email="MatthijsBurgh@outlook.com">Matthijs van der Burgh</maintainer>
 
   <license>BSD-2-Clause</license>
+
+  <author email="MatthijsBurgh@outlook.com">Matthijs van der Burgh</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
@@ -23,9 +23,13 @@
   <depend>rclcpp</depend>
   <depend>shape_msgs</depend>
   <depend>std_srvs</depend>
+  <depend>tue_config</depend>
+
+  <test_depend>ament_cmake_lint_cmake</test_depend>
+  <test_depend>ament_cmake_xmllint</test_depend>
 
   <export>
-    <ed plugin="${prefix}/plugins.xml" />
+    <build_type>ament_cmake</build_type>
   </export>
 
 </package>
