@@ -5,17 +5,14 @@
 
 #include <ed/types.h>
 
-// Communication
-#include <ros/callback_queue.h>
-#include <ros/service_server.h>
-#include <ros/publisher.h>
+#include <rclcpp/rclcpp.hpp>
 
 // Configuration
 #include <tue/config/configuration.h>
 
 //msgs&srvs
-#include <moveit_msgs/PlanningSceneWorld.h>
-#include <std_srvs/Trigger.h>
+#include <moveit_msgs/msg/planning_scene_world.hpp>
+#include <std_srvs/srv/trigger.hpp>
 
 class MoveitPlugin : public ed::Plugin
 {
@@ -38,14 +35,11 @@ private:
 
     ed::UpdateRequest* update_req_;
 
-    // Communication
-
-    ros::CallbackQueue cb_queue_;
-
-
-    ros::ServiceServer srv_publish_moveit_scene_;
-    bool srvPublishMoveitScene(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
-    ros::Publisher moveit_scene_publisher_;
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr srv_publish_moveit_scene_;
+    void srvPublishMoveitScene(
+        const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+        std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+    rclcpp::Publisher<moveit_msgs::msg::PlanningSceneWorld>::SharedPtr moveit_scene_publisher_;
 
 };
 

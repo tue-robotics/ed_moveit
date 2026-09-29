@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <class_libraries>
-  <library path="lib/libed_moveit_plugin">
+  <library path="ed_moveit_plugin">
     <class name="ed_moveit/moveit" type="MoveitPlugin" base_class_type="ed::Plugin">
       <description>Plugin to provide a collision environment to moveit.</description>
     </class>
