@@ -6,47 +6,37 @@
 #include <ed/types.h>
 
 // Communication
-#include <ros/callback_queue.h>
-#include <ros/service_server.h>
-#include <ros/publisher.h>
+#include <rclcpp/callback_group.hpp>
+#include <rclcpp/executors/single_threaded_executor.hpp>
+#include <rclcpp/publisher.hpp>
+#include <rclcpp/service.hpp>
 
-// Configuration
-#include <tue/config/configuration.h>
+// msgs&srvs
+#include <moveit_msgs/msg/planning_scene_world.hpp>
+#include <std_srvs/srv/trigger.hpp>
 
-//msgs&srvs
-#include <moveit_msgs/PlanningSceneWorld.h>
-#include <std_srvs/Trigger.h>
+#include <memory>
 
 class MoveitPlugin : public ed::Plugin
 {
 
 public:
+    void initialize() override;
 
-    MoveitPlugin();
-
-    virtual ~MoveitPlugin();
-
-    void configure(tue::Configuration config);
-
-    void initialize();
-
-    void process(const ed::WorldModel& world, ed::UpdateRequest& req);
+    void process(const ed::WorldModel& world, ed::UpdateRequest& req) override;
 
 private:
-
-    const ed::WorldModel* world_model_;
-
-    ed::UpdateRequest* update_req_;
+    const ed::WorldModel* world_model_{nullptr};
 
     // Communication
 
-    ros::CallbackQueue cb_queue_;
+    rclcpp::CallbackGroup::SharedPtr cb_group_;
+    rclcpp::executors::SingleThreadedExecutor executor_;
 
-
-    ros::ServiceServer srv_publish_moveit_scene_;
-    bool srvPublishMoveitScene(std_srvs::Trigger::Request& req, std_srvs::Trigger::Response& res);
-    ros::Publisher moveit_scene_publisher_;
-
+    rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr srv_publish_moveit_scene_;
+    void srvPublishMoveitScene(const std::shared_ptr<std_srvs::srv::Trigger::Request>& req,
+                               const std::shared_ptr<std_srvs::srv::Trigger::Response>& res);
+    rclcpp::Publisher<moveit_msgs::msg::PlanningSceneWorld>::SharedPtr moveit_scene_publisher_;
 };
 
 #endif
