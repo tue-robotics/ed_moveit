@@ -22,7 +22,6 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
-find_package(tue_config REQUIRED)
 
 add_library(ed_moveit_plugin SHARED
   src/moveit_plugin.cpp
@@ -35,7 +34,6 @@ target_link_libraries(ed_moveit_plugin PUBLIC
   moveit_msgs::moveit_msgs
   rclcpp::rclcpp
   std_srvs::std_srvs
-  tue_config::tue_config
 )
 target_link_libraries(ed_moveit_plugin PRIVATE
   geolib2::geolib
@@ -54,8 +52,15 @@ install(
 )
 
 if(BUILD_TESTING)
+  find_package(ament_cmake_clang_format REQUIRED)
+  find_package(ament_cmake_clang_tidy REQUIRED)
   find_package(ament_cmake_lint_cmake REQUIRED)
   find_package(ament_cmake_xmllint REQUIRED)
+  find_package(tue_lint_config REQUIRED)
+
+  ament_clang_format(CONFIG_FILE ${tue_lint_config_DIR}/../config/.clang-format --clang-format-version=21)
+  ament_clang_tidy(CONFIG_FILE ${tue_lint_config_DIR}/../config/.clang-tidy --clang-tidy-version=21
+    ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR}/compile_commands.json)
   ament_lint_cmake(MAX_LINE_LENGTH 120)
   ament_xmllint(MAX_LINE_LENGTH 120)
 endif()
